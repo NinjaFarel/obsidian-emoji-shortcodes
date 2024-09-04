@@ -7,6 +7,7 @@ export interface EmojiPluginSettings {
 	historyPriority: boolean;
 	historyLimit: number;
 	history: string[];
+	aliases: { [key: string]: string }
 }
 
 export const DEFAULT_SETTINGS: EmojiPluginSettings = {
@@ -15,6 +16,7 @@ export const DEFAULT_SETTINGS: EmojiPluginSettings = {
 	historyPriority: true,
 	historyLimit: 100,
 	history: [],
+	aliases: {}
 }
 
 export class EmojiPluginSettingTab extends PluginSettingTab {

@@ -9,6 +9,7 @@ export default class EmojiShortcodesPlugin extends Plugin {
 
 	settings: EmojiPluginSettings;
 	emojiList: string[];
+	combinedEmojis: { [key: string]: string }
 
 	async onload() {
 		await this.loadSettings();
@@ -30,8 +31,9 @@ export default class EmojiShortcodesPlugin extends Plugin {
 	}
 
 	updateEmojiList() {
-		const set = new Set(this.settings.history)
-		this.emojiList = [...this.settings.history, ...Object.keys(emoji).filter(e => !set.has(e))];
+		const set = new Set(this.settings.history);
+		this.emojiList = [...this.settings.history,  ...Object.keys(this.settings.aliases).filter(e => !set.has(e)) , ...Object.keys(emoji).filter(e => !set.has(e))];
+		this.combinedEmojis = {...emoji, ...this.settings.aliases};
 	}
 
 	updateHistory(suggestion: string) {
@@ -80,12 +82,12 @@ class EmojiSuggester extends EditorSuggest<string> {
 		const outer = el.createDiv({ cls: "ES-suggester-container" });
 		outer.createDiv({ cls: "ES-shortcode" }).setText(suggestion.replace(/:/g, ""));
 		//@ts-expect-error
-		outer.createDiv({ cls: "ES-emoji" }).setText(emoji[suggestion]);
+		outer.createDiv({ cls: "ES-emoji" }).setText(this.plugin.combinedEmojis[suggestion]);
 	}
 
 	selectSuggestion(suggestion: string): void {
 		if(this.context) {
-			(this.context.editor as Editor).replaceRange(this.plugin.settings.immediateReplace ? emoji[suggestion] : `${suggestion} `, this.context.start, this.context.end);
+			(this.context.editor as Editor).replaceRange(this.plugin.settings.immediateReplace ? this.plugin.combinedEmojis[suggestion] : `${suggestion} `, this.context.start, this.context.end);
 			this.plugin.updateHistory(suggestion);
 		}
 	}
